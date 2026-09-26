@@ -1,0 +1,15 @@
+{
+  "name": "om-dental-clinic-monorepo",
+  "version": "1.0.0",
+  "description": "Shree Dental Clinic Website with Express Backend & React Frontend",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run preview",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

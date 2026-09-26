@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0F172A; /* Deep Navy / Medical Blue */
+  --color-primary-light: #1E293B; 
+  --color-accent: #0D9488; /* Premium Teal */
+  --color-accent-hover: #0F766E;
+  --color-surface: #ffffff; /* Clean white */
+  --color-background: #F8FAFC; /* Off-white / slate 50 */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply text-slate-800 bg-background antialiased font-sans;
+  }
+}
