@@ -8,7 +8,7 @@ export const clinicData = {
   experience: "15+ Years Clinical Experience",
   phone: "+91 94235 17934",
   whatsapp: "919423517934",
-  email: "ahireraj213@gmail.com",
+  email: "aadity1982@gmail.com",
   address: "Shop No-2, Pawan Heights, Veer Savarkar Chowk, Shivaji Road, Camp, Malegaon - 423203",
   openingHours: "Mon - Sat: 10:00 AM - 9:00 PM | Sun: On Prior Appointment",
   mapsUrl: "https://maps.google.com/?q=Shop+No-2+Pawan+Heights+Veer+Savarkar+Chowk+Shivaji+Road+Camp+Malegaon",
