@@ -1,10 +1,10 @@
 import nodemailer from 'nodemailer';
 
-const CLINIC_EMAIL = process.env.CLINIC_EMAIL || 'ahiredhiraj213@gmail.com';
-const CLINIC_NAME = process.env.CLINIC_NAME || 'Shree Dental Clinic';
-const DOCTOR_NAME = process.env.DOCTOR_NAME || 'Dr. Pravin Pawar';
-const CLINIC_PHONE = process.env.CLINIC_PHONE || '+91 94235 17934';
-const CLINIC_ADDRESS = process.env.CLINIC_ADDRESS || 'Shop No-2, Pawan Heights, Veer Savarkar Chowk, Shivaji Road, Camp, Malegaon - 423203';
+const getClinicEmail = () => process.env.CLINIC_EMAIL?.trim() || 'aadity1982@gmail.com';
+const getClinicName = () => process.env.CLINIC_NAME?.trim() || 'Shree Dental Clinic';
+const getDoctorName = () => process.env.DOCTOR_NAME?.trim() || 'Dr. Pravin Pawar';
+const getClinicPhone = () => process.env.CLINIC_PHONE?.trim() || '+91 94235 17934';
+const getClinicAddress = () => process.env.CLINIC_ADDRESS?.trim() || 'Shop No-2, Pawan Heights, Veer Savarkar Chowk, Shivaji Road, Camp, Malegaon - 423203';
 
 /**
  * Helper to initialize nodemailer transporter
@@ -16,7 +16,7 @@ export async function getTransporter(forceRefresh = false) {
   // 1. Custom SMTP configuration
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST.trim(),
       port: Number(process.env.SMTP_PORT) || 587,
       secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
       auth: {
@@ -44,6 +44,7 @@ export async function getTransporter(forceRefresh = false) {
  * Test SMTP connection and return diagnostics
  */
 export async function testEmailConnection() {
+  const clinicEmail = getClinicEmail();
   try {
     const emailUser = process.env.EMAIL_USER?.trim();
     const emailPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '';
@@ -53,7 +54,7 @@ export async function testEmailConnection() {
         success: false,
         configured: false,
         message: 'No email credentials configured. Please set EMAIL_USER and EMAIL_PASS in backend/.env.',
-        clinicEmail: CLINIC_EMAIL
+        clinicEmail: clinicEmail
       };
     }
 
@@ -63,7 +64,7 @@ export async function testEmailConnection() {
         success: false,
         configured: false,
         message: 'Unable to initialize email transporter with provided configuration.',
-        clinicEmail: CLINIC_EMAIL
+        clinicEmail: clinicEmail
       };
     }
 
@@ -72,7 +73,7 @@ export async function testEmailConnection() {
       success: true,
       configured: true,
       sender: emailUser,
-      recipient: CLINIC_EMAIL,
+      recipient: clinicEmail,
       message: 'SMTP credentials verified successfully! Live email dispatch is active.'
     };
   } catch (error) {
@@ -96,10 +97,10 @@ export async function testEmailConnection() {
  */
 function formatServiceName(service) {
   const map = {
+    pain: 'Emergency Tooth Pain / Root Canal (RCT)',
     general: 'General Dental Checkup & Consultation',
     cleaning: 'Ultrasonic Teeth Cleaning & Polishing',
     whitening: 'Teeth Whitening & Smile Aesthetics',
-    pain: 'Emergency Tooth Pain / Root Canal (RCT)',
     implants: 'Dental Implants & Zirconia Crown',
     aligners: 'Invisible Clear Aligners / Braces',
     pediatric: 'Pediatric Dental Care (Kids)',
@@ -112,6 +113,12 @@ function formatServiceName(service) {
  * Send notification email to doctor/clinic AND confirmation email to patient
  */
 export async function sendAppointmentNotificationEmail(appointmentData) {
+  const clinicEmail = getClinicEmail();
+  const clinicName = getClinicName();
+  const doctorName = getDoctorName();
+  const clinicPhone = getClinicPhone();
+  const clinicAddress = getClinicAddress();
+
   const {
     name,
     phone,
@@ -134,7 +141,7 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
   const waPhone = phone.replace(/[^0-9]/g, '');
   const submissionTimestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-  const doctorSubject = `🏥 New Appointment Booking: ${name} - ${serviceName} | ${CLINIC_NAME}`;
+  const doctorSubject = `🏥 New Appointment Booking: ${name} - ${serviceName} | ${clinicName}`;
 
   const doctorHtmlContent = `
 <!DOCTYPE html>
@@ -165,8 +172,8 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🦷 ${CLINIC_NAME}</h1>
-      <p>Official Patient Appointment Notification for <strong>${DOCTOR_NAME}</strong></p>
+      <h1>🦷 ${clinicName}</h1>
+      <p>Official Patient Appointment Notification for <strong>${doctorName}</strong></p>
       ${service === 'pain' ? '<div class="badge-urgent">⚡ PRIORITY: Severe Tooth Pain / Emergency</div>' : ''}
     </div>
 
@@ -218,20 +225,20 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
 
       <div class="action-buttons">
         <a href="tel:${cleanPhone}" class="btn btn-call">📞 Call Patient Directly</a>
-        <a href="https://wa.me/${waPhone}?text=Hello%20${encodeURIComponent(name)}%2C%20this%20is%20${encodeURIComponent(DOCTOR_NAME)}%20from%20${encodeURIComponent(CLINIC_NAME)}%20regarding%20your%20appointment%20request." class="btn btn-whatsapp">💬 Open WhatsApp Chat</a>
+        <a href="https://wa.me/${waPhone}?text=Hello%20${encodeURIComponent(name)}%2C%20this%20is%20${encodeURIComponent(doctorName)}%20from%20${encodeURIComponent(clinicName)}%20regarding%20your%20appointment%20request." class="btn btn-whatsapp">💬 Open WhatsApp Chat</a>
       </div>
     </div>
 
     <div class="footer">
-      <p>Automated booking notification generated by ${CLINIC_NAME} Portal.</p>
-      <p>Recipient: ${CLINIC_EMAIL} | Doctor in Charge: ${DOCTOR_NAME}</p>
+      <p>Automated booking notification generated by ${clinicName} Portal.</p>
+      <p>Recipient: ${clinicEmail} | Doctor in Charge: ${doctorName}</p>
     </div>
   </div>
 </body>
 </html>
   `;
 
-  const patientSubject = `✅ Appointment Request Received - ${CLINIC_NAME} (${DOCTOR_NAME})`;
+  const patientSubject = `✅ Appointment Request Received - ${clinicName} (${doctorName})`;
 
   const patientHtmlContent = `
 <!DOCTYPE html>
@@ -259,7 +266,7 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🦷 ${CLINIC_NAME}</h1>
+      <h1>🦷 ${clinicName}</h1>
       <p>Appointment Request Confirmation</p>
     </div>
 
@@ -268,7 +275,7 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
         Hello <strong>${name}</strong>,
       </div>
       <p style="color: #475569; font-size: 14px;">
-        Thank you for booking with <strong>${CLINIC_NAME}</strong>. We have received your appointment request and <strong>${DOCTOR_NAME}</strong>'s team will contact you shortly to confirm your slot.
+        Thank you for booking with <strong>${clinicName}</strong>. We have received your appointment request and <strong>${doctorName}</strong>'s team will contact you shortly to confirm your slot.
       </p>
 
       <div class="card">
@@ -287,26 +294,26 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b;">Clinic Doctor:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: bold; text-align: right;">${DOCTOR_NAME}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: bold; text-align: right;">${doctorName}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b;">Clinic Phone:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: bold; text-align: right;">${CLINIC_PHONE}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: bold; text-align: right;">${clinicPhone}</td>
           </tr>
         </table>
       </div>
 
       <p style="color: #475569; font-size: 13px;">
-        📍 <strong>Clinic Address:</strong> ${CLINIC_ADDRESS}
+        📍 <strong>Clinic Address:</strong> ${clinicAddress}
       </p>
 
       <div style="text-align: center; margin-top: 20px;">
-        <a href="tel:${CLINIC_PHONE.replace(/[^0-9+]/g, '')}" class="btn">📞 Call Clinic Desk: ${CLINIC_PHONE}</a>
+        <a href="tel:${clinicPhone.replace(/[^0-9+]/g, '')}" class="btn">📞 Call Clinic Desk: ${clinicPhone}</a>
       </div>
     </div>
 
     <div class="footer">
-      <p>${CLINIC_NAME} • Gentle, Painless & Modern Dentistry</p>
+      <p>${clinicName} • Gentle, Painless & Modern Dentistry</p>
       <p>If you have any questions or need to reschedule, please call or WhatsApp us directly.</p>
     </div>
   </div>
@@ -323,7 +330,7 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
         success: false,
         simulated: true,
         error: 'Email credentials not configured in backend/.env',
-        recipient: CLINIC_EMAIL
+        recipient: clinicEmail
       };
     }
 
@@ -331,22 +338,22 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
 
     // 1. Send doctor notification email
     const doctorMailOptions = {
-      from: `"${CLINIC_NAME} Booking" <${senderAddress}>`,
-      to: CLINIC_EMAIL,
+      from: `"${clinicName} Booking" <${senderAddress}>`,
+      to: clinicEmail,
       replyTo: email && email.includes('@') ? email : undefined,
       subject: doctorSubject,
       html: doctorHtmlContent,
     };
 
     const doctorInfo = await transporter.sendMail(doctorMailOptions);
-    console.log(`[EMAIL DISPATCH SUCCESS] Clinic notification sent to ${CLINIC_EMAIL}. MessageId: ${doctorInfo.messageId}`);
+    console.log(`[EMAIL DISPATCH SUCCESS] Clinic notification sent to ${clinicEmail}. MessageId: ${doctorInfo.messageId}`);
 
     // 2. Send patient confirmation email if patient provided an email address
     let patientEmailSent = false;
     if (email && email.includes('@') && email !== 'Not Provided') {
       try {
         const patientMailOptions = {
-          from: `"${CLINIC_NAME}" <${senderAddress}>`,
+          from: `"${clinicName}" <${senderAddress}>`,
           to: email.trim(),
           subject: patientSubject,
           html: patientHtmlContent,
@@ -364,15 +371,15 @@ export async function sendAppointmentNotificationEmail(appointmentData) {
       doctorNotified: true,
       patientNotified: patientEmailSent,
       messageId: doctorInfo.messageId,
-      recipient: CLINIC_EMAIL
+      recipient: clinicEmail
     };
   } catch (error) {
-    console.error(`[EMAIL DISPATCH ERROR] Failed to send email to ${CLINIC_EMAIL}:`, error.message);
+    console.error(`[EMAIL DISPATCH ERROR] Failed to send email to ${clinicEmail}:`, error.message);
     return {
       success: false,
       error: error.message,
       code: error.code,
-      recipient: CLINIC_EMAIL
+      recipient: clinicEmail
     };
   }
 }
