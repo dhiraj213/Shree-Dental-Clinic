@@ -39,7 +39,5 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/appointments', appointmentRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export Express app for Vercel
+export default app;
